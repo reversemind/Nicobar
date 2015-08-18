@@ -17,26 +17,6 @@
  */
 package com.netflix.nicobar.groovy2.plugin;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
-import org.apache.commons.io.FileUtils;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import com.netflix.nicobar.core.archive.JarScriptArchive;
 import com.netflix.nicobar.core.archive.PathScriptArchive;
 import com.netflix.nicobar.core.archive.ScriptArchive;
@@ -51,6 +31,18 @@ import com.netflix.nicobar.core.plugin.ScriptCompilerPluginSpec;
 import com.netflix.nicobar.groovy2.internal.compile.Groovy2Compiler;
 import com.netflix.nicobar.groovy2.testutil.GroovyTestResourceUtil;
 import com.netflix.nicobar.groovy2.testutil.GroovyTestResourceUtil.TestScript;
+import org.apache.commons.io.FileUtils;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.Callable;
+
+import static org.testng.Assert.*;
 
 /**
  * Integration tests for the Groovy2 language plugin
@@ -260,13 +252,18 @@ public class Groovy2PluginTest {
     @Test
     public void testMixedModule() throws Exception {
         ScriptModuleLoader.Builder moduleLoaderBuilder = createGroovyModuleLoader();
+
         ScriptModuleLoader loader = moduleLoaderBuilder.addPluginSpec(
                 new ScriptCompilerPluginSpec.Builder(BytecodeLoadingPlugin.PLUGIN_ID)
                     .withPluginClassName(BytecodeLoadingPlugin.class.getName()).build())
+                .withCompilationRootDir(Paths.get("/opt/_del/_other"))
                .build();
+
         Path jarPath = GroovyTestResourceUtil.findRootPathForScript(TestScript.MIXED_MODULE).resolve(TestScript.MIXED_MODULE.getScriptPath());
+
         ScriptArchive archive = new JarScriptArchive.Builder(jarPath).build();
         loader.updateScriptArchives(Collections.singleton(archive));
+
         ScriptModule scriptModule = loader.getScriptModule(TestScript.MIXED_MODULE.getModuleId());
         Class<?> clazz = findClassByName(scriptModule, TestScript.MIXED_MODULE);
         Object instance = clazz.newInstance();

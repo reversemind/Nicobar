@@ -17,35 +17,26 @@
  */
 package com.netflix.nicobar.core.module.jboss;
 
-import static com.netflix.nicobar.core.testutil.CoreTestResourceUtil.TestResource.TEST_TEXT_JAR;
-import static com.netflix.nicobar.core.testutil.CoreTestResourceUtil.TestResource.TEST_TEXT_PATH;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import com.netflix.nicobar.core.archive.*;
+import com.netflix.nicobar.core.plugin.ScriptCompilerPlugin;
+import com.netflix.nicobar.core.plugin.ScriptCompilerPluginSpec;
+import com.netflix.nicobar.core.testutil.CoreTestResourceUtil;
+import org.jboss.modules.*;
+import org.testng.TestNG;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import org.jboss.modules.Module;
-import org.jboss.modules.ModuleClassLoader;
-import org.jboss.modules.ModuleIdentifier;
-import org.jboss.modules.ModuleSpec;
-import org.jboss.modules.Resource;
-import org.testng.TestNG;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.netflix.nicobar.core.archive.JarScriptArchive;
-import com.netflix.nicobar.core.archive.ModuleId;
-import com.netflix.nicobar.core.archive.PathScriptArchive;
-import com.netflix.nicobar.core.archive.ScriptArchive;
-import com.netflix.nicobar.core.archive.ScriptModuleSpec;
-import com.netflix.nicobar.core.plugin.ScriptCompilerPlugin;
-import com.netflix.nicobar.core.plugin.ScriptCompilerPluginSpec;
-import com.netflix.nicobar.core.testutil.CoreTestResourceUtil;
+import static com.netflix.nicobar.core.testutil.CoreTestResourceUtil.TestResource.TEST_TEXT_JAR;
+import static com.netflix.nicobar.core.testutil.CoreTestResourceUtil.TestResource.TEST_TEXT_PATH;
+import static org.testng.Assert.*;
 
 
 /**
@@ -122,6 +113,41 @@ public class JBossModuleUtilsTest {
         assertEquals(actualPaths, TEST_TEXT_JAR.getContentPaths());
     }
 
+    @Test
+    public void testJarResourcesMulti() throws Exception {
+        Path jarPath = CoreTestResourceUtil.getResourceAsPath(TEST_TEXT_JAR);
+        ScriptArchive jarScriptArchive = new JarScriptArchive.Builder(jarPath)
+                .setModuleSpec(new ScriptModuleSpec.Builder(ModuleId.create("testModuleId"))
+                        .addMetadata(METADATA_NAME, METADATA_VALUE)
+                        .build())
+                .build();
+
+        ExecutorService containerCaller = Executors.newFixedThreadPool(20);
+        while (true) {
+            containerCaller.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        ModuleIdentifier revisionId = JBossModuleUtils.createRevisionId(TEST_TEXT_JAR.getModuleId(), 1);
+                        ModuleSpec.Builder moduleSpecBuilder = ModuleSpec.build(revisionId);
+                        JBossModuleLoader moduleLoader = new JBossModuleLoader();
+                        JBossModuleUtils.populateModuleSpecWithCoreDependencies(moduleSpecBuilder, jarScriptArchive);
+                        JBossModuleUtils.populateModuleSpecWithResources(moduleSpecBuilder, jarScriptArchive);
+
+                        moduleLoader.addModuleSpec(moduleSpecBuilder.create());
+                        Module module = moduleLoader.loadModule(revisionId);
+                        ModuleClassLoader moduleClassLoader = module.getClassLoader();
+
+                        Set<String> actualPaths = getResourcePaths(moduleClassLoader);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+            Thread.sleep(10);
+        }
+    }
+
     /**
      * Verify that the module creates the expected set of dependencies for a {@link PathScriptArchive}
      */
@@ -130,8 +156,8 @@ public class JBossModuleUtilsTest {
         Path jarPath = CoreTestResourceUtil.getResourceAsPath(TEST_TEXT_PATH);
         ScriptArchive jarScriptArchive = new PathScriptArchive.Builder(jarPath)
             .setModuleSpec(new ScriptModuleSpec.Builder(ModuleId.create("testModuleId"))
-                .addMetadata(METADATA_NAME, METADATA_VALUE)
-                .build())
+                    .addMetadata(METADATA_NAME, METADATA_VALUE)
+                    .build())
             .build();
         ModuleIdentifier revisionId = JBossModuleUtils.createRevisionId(TEST_TEXT_PATH.getModuleId(), 1);
         ModuleSpec.Builder moduleSpecBuilder = ModuleSpec.build(revisionId);
