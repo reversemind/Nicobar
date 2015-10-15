@@ -146,6 +146,7 @@ public class JBossModuleUtilsTest {
             });
             Thread.sleep(10);
         }
+
     }
 
     /**
@@ -162,6 +163,7 @@ public class JBossModuleUtilsTest {
         ModuleIdentifier revisionId = JBossModuleUtils.createRevisionId(TEST_TEXT_PATH.getModuleId(), 1);
         ModuleSpec.Builder moduleSpecBuilder = ModuleSpec.build(revisionId);
         JBossModuleLoader moduleLoader = new JBossModuleLoader();
+
         JBossModuleUtils.populateModuleSpecWithCoreDependencies(moduleSpecBuilder, jarScriptArchive);
         JBossModuleUtils.populateModuleSpecWithResources(moduleSpecBuilder, jarScriptArchive);
         moduleLoader.addModuleSpec(moduleSpecBuilder.create());

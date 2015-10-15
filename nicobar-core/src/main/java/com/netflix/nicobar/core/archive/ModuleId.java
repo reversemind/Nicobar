@@ -25,10 +25,13 @@ import java.util.regex.Pattern;
  * @author Vasanth Asokan, based on ModuleIdentifier.java in org.jboss.modules.
  */
 public final class ModuleId {
+
     private static final String MODULE_NAME_PATTERN_STR = "^[a-zA-Z0-9_/][a-zA-Z0-9_\\-{}\\\\@$:<>/]*$";
     private static final String MODULE_VERSION_PATTERN_STR = "^[a-zA-Z0-9_\\-]*$";
+
     private static Pattern MODULE_NAME_PATTERN = Pattern.compile(MODULE_NAME_PATTERN_STR);
     private static Pattern MODULE_VERSION_PATTERN = Pattern.compile(MODULE_VERSION_PATTERN_STR);
+
     public static final String DEFAULT_VERSION = "";
     public static final String MODULE_VERSION_SEPARATOR = ".";
 

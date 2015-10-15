@@ -16,8 +16,18 @@
 package com.netflix.nicobar.core.utils;
 
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import com.google.common.collect.Sets;
+import com.netflix.nicobar.core.archive.JarScriptArchive;
+import com.netflix.nicobar.core.archive.ModuleId;
+import com.netflix.nicobar.core.archive.ScriptArchive;
+import com.netflix.nicobar.core.module.ScriptModule;
+import com.netflix.nicobar.core.module.ScriptModuleLoader;
+import com.netflix.nicobar.core.module.ScriptModuleUtils;
+import com.netflix.nicobar.core.plugin.BytecodeLoadingPlugin;
+import com.netflix.nicobar.core.plugin.ScriptCompilerPluginSpec;
+import org.jboss.modules.ModuleLoadException;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -29,19 +39,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jboss.modules.ModuleLoadException;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.google.common.collect.Sets;
-import com.netflix.nicobar.core.archive.JarScriptArchive;
-import com.netflix.nicobar.core.archive.ModuleId;
-import com.netflix.nicobar.core.archive.ScriptArchive;
-import com.netflix.nicobar.core.module.ScriptModule;
-import com.netflix.nicobar.core.module.ScriptModuleLoader;
-import com.netflix.nicobar.core.module.ScriptModuleUtils;
-import com.netflix.nicobar.core.plugin.BytecodeLoadingPlugin;
-import com.netflix.nicobar.core.plugin.ScriptCompilerPluginSpec;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link ScriptModuleUtils}
@@ -64,6 +63,12 @@ public class ScriptModuleUtilsTest {
                 Collections.<String> emptySet(),
                 excludes);
 
+        System.out.println("\n\n\n");
+        pathSet.stream().forEach((item) -> {
+            System.out.println("path:" + item);
+        });
+        System.out.println("\n\n\n");
+
         moduleLoader = new ScriptModuleLoader.Builder()
             .addPluginSpec(pluginSpec)
             // TODO: The BytecodeLoadingPlugin seems to work without the app package filter
@@ -72,6 +77,11 @@ public class ScriptModuleUtilsTest {
             // without an app package filter as below.
             .addAppPackages(pathSet)
             .build();
+    }
+
+    @Test
+    public void simpleTest(){
+
     }
 
     @Test
