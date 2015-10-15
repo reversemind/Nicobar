@@ -17,21 +17,16 @@
  */
 package com.netflix.nicobar.groovy2.internal.compile;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.CompilationCustomizer;
-
 import com.netflix.nicobar.core.archive.ScriptArchive;
 import com.netflix.nicobar.core.compile.ScriptArchiveCompiler;
 import com.netflix.nicobar.core.compile.ScriptCompilationException;
 import com.netflix.nicobar.core.module.jboss.JBossModuleClassLoader;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.CompilationCustomizer;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Groovy specific implementation of the {@link ScriptArchiveCompiler}
@@ -44,13 +39,17 @@ public class Groovy2Compiler implements ScriptArchiveCompiler {
     public final static String GROOVY2_COMPILER_ID = "groovy2";
     public final static String GROOVY2_COMPILER_PARAMS_CUSTOMIZERS = "customizerClassNames";
 
-    private List<String> customizerClassNames = new LinkedList<String>();
+    protected List<String> customizerClassNames = new LinkedList<String>();
 
     public Groovy2Compiler(Map<String, Object> compilerParams) {
         this.processCompilerParams(compilerParams);
     }
 
-    private void processCompilerParams(Map<String, Object> compilerParams) {
+    public String getCompilerId(){
+        return GROOVY2_COMPILER_ID;
+    }
+
+    protected void processCompilerParams(Map<String, Object> compilerParams) {
         
         // filtering compilation customizers class names
         if (compilerParams.containsKey(GROOVY2_COMPILER_PARAMS_CUSTOMIZERS)) {
@@ -66,7 +65,7 @@ public class Groovy2Compiler implements ScriptArchiveCompiler {
         }
     }
 
-    private CompilationCustomizer getCustomizerInstanceFromString(String className, JBossModuleClassLoader moduleClassLoader) {
+    protected CompilationCustomizer getCustomizerInstanceFromString(String className, JBossModuleClassLoader moduleClassLoader) {
         CompilationCustomizer instance = null;
 
         try {
@@ -86,7 +85,7 @@ public class Groovy2Compiler implements ScriptArchiveCompiler {
 
     @Override
     public boolean shouldCompile(ScriptArchive archive) {
-       return archive.getModuleSpec().getCompilerPluginIds().contains(GROOVY2_COMPILER_ID);
+       return archive.getModuleSpec().getCompilerPluginIds().contains(this.getCompilerId());
     }
 
     @Override

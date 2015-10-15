@@ -17,26 +17,20 @@
  */
 package com.netflix.nicobar.groovy2.internal.compile;
 
+import com.netflix.nicobar.core.archive.ScriptArchive;
+import com.netflix.nicobar.core.compile.ScriptCompilationException;
 import groovy.lang.GroovyClassLoader;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.Phases;
 import org.codehaus.groovy.tools.GroovyClass;
 
-import com.netflix.nicobar.core.archive.ScriptArchive;
-import com.netflix.nicobar.core.compile.ScriptCompilationException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.*;
 
 /**
  * Helper class for compiling Groovy files into classes. This class takes as it's input a collection
@@ -48,6 +42,7 @@ import com.netflix.nicobar.core.compile.ScriptCompilationException;
  * @author Vasanth Asokan
  */
 public class Groovy2CompilerHelper {
+
     private final Path targetDir;
     private final List<Path> sourceFiles = new LinkedList<Path>();
     private final List<ScriptArchive> scriptArchives = new LinkedList<ScriptArchive>();
@@ -83,6 +78,18 @@ public class Groovy2CompilerHelper {
             this.compileConfig = compilerConfig;
         }
         return this;
+    }
+
+    protected Path getTargetDir(){
+        return this.targetDir;
+    }
+
+    protected List<Path> getSourceFiles(){
+        return this.sourceFiles;
+    }
+
+    protected List<ScriptArchive> getScriptArchives(){
+
     }
 
     /**
@@ -121,7 +128,7 @@ public class Groovy2CompilerHelper {
         } catch (IOException e) {
             throw new ScriptCompilationException("Exception loading source files", e);
         }
-        for (Path sourceFile : sourceFiles) {
+        for (Path sourceFile : this.getSourceFiles()) {
             unit.addSource(sourceFile.toFile());
         }
         try {
