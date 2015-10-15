@@ -89,7 +89,15 @@ public class Groovy2CompilerHelper {
     }
 
     protected List<ScriptArchive> getScriptArchives(){
+        return this.scriptArchives;
+    }
 
+    protected ClassLoader getParentClassLoader(){
+        return this.parentClassLoader;
+    }
+
+    protected CompilerConfiguration getCompileConfig(){
+        return this.compileConfig;
     }
 
     /**
@@ -99,12 +107,12 @@ public class Groovy2CompilerHelper {
      */
     @SuppressWarnings("unchecked")
     public Set<GroovyClass> compile() throws ScriptCompilationException {
-        final CompilerConfiguration conf = compileConfig != null ? compileConfig: CompilerConfiguration.DEFAULT;
+        final CompilerConfiguration conf = this.getCompileConfig() != null ? this.getCompileConfig(): CompilerConfiguration.DEFAULT;
         conf.setTolerance(0);
         conf.setVerbose(true);
         conf.setTargetDirectory(targetDir.toFile());
-        final ClassLoader buildParentClassloader = parentClassLoader != null ?
-            parentClassLoader : Thread.currentThread().getContextClassLoader();
+        final ClassLoader buildParentClassloader = this.getParentClassLoader() != null ?
+            this.getParentClassLoader() : Thread.currentThread().getContextClassLoader();
         GroovyClassLoader groovyClassLoader = AccessController.doPrivileged(new PrivilegedAction<GroovyClassLoader>() {
             public GroovyClassLoader run() {
                 return new GroovyClassLoader(buildParentClassloader, conf, false);
@@ -114,7 +122,7 @@ public class Groovy2CompilerHelper {
         CompilationUnit unit = new CompilationUnit(conf, null, groovyClassLoader);
         Set<String> scriptExtensions = conf.getScriptExtensions();
         try {
-            for (ScriptArchive scriptArchive : scriptArchives) {
+            for (ScriptArchive scriptArchive : this.getScriptArchives()) {
                 Set<String> entryNames = scriptArchive.getArchiveEntryNames();
                 for (String entryName : entryNames) {
                     for (String extension : scriptExtensions) {

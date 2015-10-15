@@ -26,16 +26,9 @@ import java.util.*;
  * <p/>
  * based on {@link Groovy2CompilerHelper}
  *
- * // TODO need make attributes protected in Groovy2CompilerHelper
- *
  * @author Eugene Kalinin
  */
 public class MixGroovy2CompilerHelper extends Groovy2CompilerHelper{
-
-//    private final List<Path> sourceFiles = new LinkedList<Path>();
-//    private final List<ScriptArchive> scriptArchives = new LinkedList<ScriptArchive>();
-//    private ClassLoader parentClassLoader;
-//    private CompilerConfiguration compileConfig;
 
     public MixGroovy2CompilerHelper(Path targetDir) {
         super(targetDir);
@@ -47,14 +40,15 @@ public class MixGroovy2CompilerHelper extends Groovy2CompilerHelper{
      * @return initialized and laoded classes
      * @throws ScriptCompilationException
      */
+    @Override
     @SuppressWarnings("unchecked")
     public Set<GroovyClass> compile() throws ScriptCompilationException {
-        final CompilerConfiguration conf = compileConfig != null ? compileConfig : CompilerConfiguration.DEFAULT;
+        final CompilerConfiguration conf = this.getCompileConfig() != null ? this.getCompileConfig() : CompilerConfiguration.DEFAULT;
         conf.setTolerance(0);
         conf.setVerbose(true);
         conf.setTargetDirectory(this.getTargetDir().toFile());
-        final ClassLoader buildParentClassloader = parentClassLoader != null ?
-                parentClassLoader : Thread.currentThread().getContextClassLoader();
+        final ClassLoader buildParentClassloader = this.getParentClassLoader() != null ?
+                this.getParentClassLoader() : Thread.currentThread().getContextClassLoader();
         GroovyClassLoader groovyClassLoader = AccessController.doPrivileged(new PrivilegedAction<GroovyClassLoader>() {
             public GroovyClassLoader run() {
                 return new GroovyClassLoader(buildParentClassloader, conf, false);
@@ -63,7 +57,7 @@ public class MixGroovy2CompilerHelper extends Groovy2CompilerHelper{
 
         CompilationUnit unit = new CompilationUnit(conf, null, groovyClassLoader);
         try {
-            for (ScriptArchive scriptArchive : scriptArchives) {
+            for (ScriptArchive scriptArchive : this.getScriptArchives()) {
                 Set<String> entryNames = scriptArchive.getArchiveEntryNames();
                 for (String entryName : entryNames) {
                     if (entryName.endsWith("groovy")) {
@@ -78,7 +72,7 @@ public class MixGroovy2CompilerHelper extends Groovy2CompilerHelper{
         } catch (IOException e) {
             throw new ScriptCompilationException("Exception loading source files", e);
         }
-        for (Path sourceFile : sourceFiles) {
+        for (Path sourceFile : this.getSourceFiles()) {
             unit.addSource(sourceFile.toFile());
         }
         try {

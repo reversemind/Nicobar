@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class MixBytecodeLoadingPlugin implements ScriptCompilerPlugin {
 
-    public static final String PLUGIN_ID = "mix.bytecode";
+    public static final String MIX_PLUGIN_ID = "mix.bytecode";
 
     @Override
     public Set<? extends ScriptArchiveCompiler> getCompilers(Map<String, Object> compilerParams) {

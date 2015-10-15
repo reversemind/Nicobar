@@ -28,7 +28,6 @@ public class MixBytecodeLoader extends BytecodeLoader implements ScriptArchiveCo
      */
     @Override
     public boolean shouldCompile(ScriptArchive archive) {
-
         Set<String> entries = archive.getArchiveEntryNames();
         boolean shouldCompile = false;
         for (String entry: entries) {
@@ -78,7 +77,7 @@ public class MixBytecodeLoader extends BytecodeLoader implements ScriptArchiveCo
                     Path pathForUnJar = Paths.get(
                             Paths.get(archive.getRootUrl().toURI()).toAbsolutePath().toString(),
                             entry);
-                    MixGroovy2PluginUtils.unJar(pathForUnJar.toFile(), targetDir.toFile(), true);
+                    MixGroovy2PluginUtils.unJar(pathForUnJar, targetDir, true);
                 } catch (Exception e) {
                     throw new ScriptCompilationException("Unable to extract and copy classes from jar: " + entry, e);
                 }
