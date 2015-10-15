@@ -1,6 +1,8 @@
 package com.netflix.nicobar.mix.groovy2
 
 import com.netflix.nicobar.core.archive.ModuleId
+import com.netflix.nicobar.core.archive.ScriptArchive
+import com.netflix.nicobar.mix.groovy2.utils.MixGroovy2PluginUtils
 import groovy.util.logging.Slf4j
 import spock.lang.Specification
 
@@ -28,6 +30,9 @@ class MixModuleTest extends Specification {
         Path libPath = Paths.get(BASE_PATH, "libs").toAbsolutePath();
 
         Set<Path> runtimeJars = new HashSet<>();
+
+        // TODO ignore test jars
+
         // because of AntBuilder inside MixBytecodeLoader
         runtimeJars.add(Paths.get("src/test/resources/libs/ant-1.9.6.jar").toAbsolutePath())
         // 'cause it's run under spock tests
@@ -37,22 +42,23 @@ class MixModuleTest extends Specification {
         when:
         log.info "when"
 
-        TestHelper.resetContainer()
-
-        new Container.Builder(srcPath, classesPath, libPath)
-                .setModuleLoader(
-                ContainerUtils.createMixContainerModuleLoaderBuilder(runtimeJars)
-                        .withCompilationRootDir(classesPath)
-                        .build()
-        )
-                .setRuntimeJarLibs(runtimeJars)
-                .build()
-
-        Container container = Container.getInstance();
+//        new Container.Builder(srcPath, classesPath, libPath)
+//                .setModuleLoader(
+//                ContainerUtils.createMixContainerModuleLoaderBuilder(runtimeJars)
+//                        .withCompilationRootDir(classesPath)
+//                        .build()
+//        )
+//                .setRuntimeJarLibs(runtimeJars)
+//                .build()
+//
+//        Container container = Container.getInstance();
 
 
         1.times(){
-            container.addSrcModuleAndCompile(moduleId, false)
+//            container.addSrcModuleAndCompile(moduleId, false)
+            ScriptArchive scriptArchive = MixGroovy2PluginUtils.getMixScriptArchiveAtPath(srcPath, moduleId);
+            getModuleLoader().updateScriptArchives(new LinkedHashSet<ScriptArchive>(Arrays.asList(scriptArchive)));
+
             Thread.sleep(2000);
             log.info "\n\nmake it again";
         }
@@ -60,9 +66,6 @@ class MixModuleTest extends Specification {
 
         then:
         log.info "then"
-
-        container.executeScript(moduleId, "com.company.script")
-        container.destroy();
 
     }
 

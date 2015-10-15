@@ -35,7 +35,6 @@ public class MixBytecodeLoader extends BytecodeLoader implements ScriptArchiveCo
                 shouldCompile = true;
             }
         }
-
         return shouldCompile;
     }
 

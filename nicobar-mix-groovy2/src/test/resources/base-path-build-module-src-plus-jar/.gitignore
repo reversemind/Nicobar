@@ -1,0 +1,8 @@
+!**/src/moduleName.moduleVersion/**
+**/src/moduleName.moduleVersion/external.v1.jar
+**/src/moduleName.moduleVersion/com/other/**
+**/classes/**
+!**/classes/moduleNameNoInSrc.moduleVersionNoInSrc
+**/libs
+!**/OtherHelper.class
+!**/src/moduleNameNoInClasses.moduleVersionNoInClasses
